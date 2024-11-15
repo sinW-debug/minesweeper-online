@@ -3,86 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>扫雷游戏</title>
+    <title>Minesweeper</title>
     <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --text-color: #333;
+            --board-bg: #bdbdbd;
+            --cell-bg: #e0e0e0;
+            --cell-hover: #d0d0d0;
+            --cell-revealed: #ffffff;
+            --mine-color: #ff4136;
+            --flag-color: #2ecc40;
+            --button-bg: #0074d9;
+            --button-text: #ffffff;
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
-            transition: background-color 0.3s;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
         .container {
             text-align: center;
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin-bottom: 1.5rem;
+            color: var(--button-bg);
         }
         #game-board {
             display: inline-grid;
             gap: 1px;
-            background-color: #bdbdbd;
-            border: 3px solid #7b7b7b;
-            margin-top: 20px;
+            background-color: var(--board-bg);
+            border: 3px solid var(--board-bg);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 1.5rem;
         }
         .cell {
             width: 30px;
             height: 30px;
-            background-color: #c0c0c0;
-            border: 1px solid #fff;
+            background-color: var(--cell-bg);
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+        .cell:hover {
+            background-color: var(--cell-hover);
         }
         .cell.revealed {
-            background-color: #e0e0e0;
+            background-color: var(--cell-revealed);
         }
         .cell.mine {
-            background-color: #ff0000;
+            background-color: var(--mine-color);
         }
         .controls {
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        select, button, input[type="number"] {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        select, input[type="number"] {
+            background-color: var(--cell-bg);
+        }
+        button {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #custom-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        #game-status {
+            margin-top: 1rem;
+            font-weight: bold;
+            font-size: 1.2rem;
         }
         .dark-mode {
-            background-color: #333;
-            color: #fff;
+            --bg-color: #333;
+            --text-color: #fff;
+            --board-bg: #555;
+            --cell-bg: #777;
+            --cell-hover: #888;
+            --cell-revealed: #666;
+            --button-bg: #0056b3;
         }
-        .dark-mode #game-board {
-            background-color: #555;
+        .dark-mode .container {
+            background-color: #444;
         }
-        .dark-mode .cell {
-            background-color: #777;
-            border-color: #999;
+        .dark-mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
-        .dark-mode .cell.revealed {
-            background-color: #666;
+        .dark-mode-toggle input {
+            display: none;
+        }
+        .dark-mode-toggle label {
+            width: 48px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+        .dark-mode-toggle label::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        .dark-mode-toggle input:checked + label {
+            background-color: var(--button-bg);
+        }
+        .dark-mode-toggle input:checked + label::after {
+            transform: translateX(24px);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>扫雷游戏</h1>
+        <h1>Minesweeper</h1>
         <div class="controls">
-            <label for="difficulty">难度：</label>
             <select id="difficulty">
-                <option value="easy">简单</option>
-                <option value="medium">中等</option>
-                <option value="hard">困难</option>
-                <option value="custom">自定义</option>
+                <option value="easy">easy</option>
+                <option value="medium">medium</option>
+                <option value="hard">hard</option>
+                <option value="custom">custom</option>
             </select>
-            <button id="new-game">新游戏</button>
-            <label for="dark-mode">深色模式：</label>
-            <input type="checkbox" id="dark-mode">
+            <button id="new-game">New Game</button>
+            <div class="dark-mode-toggle">
+                <input type="checkbox" id="dark-mode">
+                <label for="dark-mode"></label>
+                <span>Dark Mode</span>
+            </div>
         </div>
         <div id="custom-controls" style="display: none;">
-            <label for="custom-rows">行数：</label>
-            <input type="number" id="custom-rows" min="5" max="30" value="9">
-            <label for="custom-cols">列数：</label>
-            <input type="number" id="custom-cols" min="5" max="30" value="9">
-            <label for="custom-mines">地雷数：</label>
-            <input type="number" id="custom-mines" min="1" value="10">
+            <input type="number" id="custom-rows" min="5" max="30" value="9" placeholder="columns">
+            <input type="number" id="custom-cols" min="5" max="30" value="9" placeholder="rows">
+            <input type="number" id="custom-mines" min="1" value="10" placeholder="mines">
         </div>
         <div id="game-board"></div>
         <div id="game-status"></div>
@@ -190,7 +283,7 @@
                 cell.classList.add('mine');
                 cell.textContent = '💣';
                 gameOver = true;
-                gameStatus.textContent = '游戏结束！';
+                gameStatus.textContent = 'Game Over!';
             } else if (board[row][col].neighborMines > 0) {
                 cell.textContent = board[row][col].neighborMines;
             } else {
@@ -231,7 +324,7 @@
                 }
             }
             gameOver = true;
-            gameStatus.textContent = '你赢了！';
+            gameStatus.textContent = 'You Win!';
         }
 
         function startNewGame() {
@@ -250,7 +343,7 @@
         }
 
         difficultySelect.addEventListener('change', () => {
-            customControls.style.display = difficultySelect.value === 'custom' ? 'block' : 'none';
+            customControls.style.display = difficultySelect.value === 'custom' ? 'flex' : 'none';
         });
 
         newGameButton.addEventListener('click', startNewGame);
